@@ -1,14 +1,11 @@
 {
   "name": "Zigbee2mqtt",
-  "version": "1.17.1-4",
+  "version": "1.16.2.2",
   "slug": "zigbee2mqtt",
-  "description": "Zigbee2mqtt add-on",
-  "uart": true,
-  "url": "https://github.com/zigbee2mqtt/hassio-zigbee2mqtt/tree/master/zigbee2mqtt",
+  "description": "Zigbee to MQTT Bridge",
+  "auto_uart": true,
+  "url": "https://github.com/danielwelch/hassio-zigbee2mqtt",
   "startup": "application",
-  "services": [
-    "mqtt:need"
-  ],
   "arch": [
     "aarch64",
     "amd64",
@@ -30,20 +27,23 @@
     "8485/tcp": "Socat tcp-listen port"
   },
   "options": {
-    "data_path": "/config/zigbee2mqtt",
+    "data_path": "/share/zigbee2mqtt",
     "external_converters": [],
     "devices": "devices.yaml",
     "groups": "groups.yaml",
     "homeassistant": true,
     "permit_join": false,
     "mqtt": {
-      "base_topic": "zigbee2mqtt"
+      "base_topic": "zigbee2mqtt",
+      "server": "mqtt://core-mosquitto",
+      "user": "my_user",
+      "password": "my_password"
     },
     "serial": {
       "port": "/dev/ttyACM0"
     },
     "advanced": {
-      "log_level": "warn",
+      "log_level": "info",
       "pan_id": 6754,
       "channel": 11,
       "network_key": [1, 3, 5, 7, 9, 11, 13, 15, 0, 2, 4, 6, 8, 10, 12, 13],
@@ -57,17 +57,22 @@
     "frontend": {
       "port": 8099
     },
-    "experimental": {},
+    "experimental": {
+      "new_api": true
+    },
     "socat": {
       "enabled": false,
-      "master": "pty,raw,echo=0,link=/tmp/ttyZ2M,mode=777",
+      "master": "pty,raw,echo=0,link=/dev/ttyZ2M,mode=777",
       "slave": "tcp-listen:8485,keepalive,nodelay,reuseaddr,keepidle=1,keepintvl=1,keepcnt=5",
+      "restartdelay": 1,
+      "initialdelay": 1,
       "options": "-d -d",
       "log": false
     }
   },
   "schema": {
     "zigbee_shepherd_devices": "bool?",
+    "zigbee_shepherd_debug": "bool?",
     "zigbee_herdsman_debug": "bool?",
     "external_converters": [
       "str?"
@@ -79,7 +84,7 @@
     "permit_join": "bool",
     "mqtt": {
       "base_topic": "str",
-      "server": "str?",
+      "server": "str",
       "ca": "str?",
       "key": "str?",
       "cert": "str?",
@@ -95,7 +100,7 @@
     "serial": {
       "port": "str",
       "disable_led": "bool?",
-      "adapter": "match(^zstack|deconz|zigate$)?"
+      "adapter": "match(^zstack|deconz$)?"
     },
     "blocklist": [
       "str?"
@@ -119,7 +124,6 @@
       "rtscts": "bool?",
       "soft_reset_timeout": "int?",
       "adapter_concurrent": "int?",
-      "adapter_delay": "int?",
       "network_key": [
         "int?"
       ],
@@ -136,9 +140,7 @@
       "report": "bool?",
       "homeassistant_discovery_topic": "str?",
       "homeassistant_status_topic": "str?",
-      "homeassistant_legacy_triggers": "bool?",
-      "ikea_ota_use_test_url": "bool?",
-      "legacy_api": "bool?"
+      "homeassistant_legacy_triggers": "bool?"
     },
     "device_options": {
       "occupancy_timeout": "int?",
@@ -152,7 +154,8 @@
     },
     "experimental": {
       "transmit_power": "int?",
-      "output": "str?"
+      "output": "str?",
+      "new_api": "bool?"
     },
     "frontend": {
       "host": "str?",
@@ -162,9 +165,11 @@
       "enabled": "bool?",
       "master": "str?",
       "slave": "str?",
+      "restartdelay": "float(0,)?",
+      "initialdelay": "float(0,)?",
       "options": "str?",
       "log": "bool?"
     }
   },
-  "image": "zigbee2mqtt/zigbee2mqtt-{arch}"
+  "image": "dwelch2101/zigbee2mqtt-{arch}"
 }
